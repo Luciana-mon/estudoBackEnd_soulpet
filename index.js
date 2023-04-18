@@ -15,7 +15,7 @@ const Cliente = require("./database/cliente"); // tenho que trazer para conf. o 
 const Endereco = require("./database/endereco");
 const Pet = require("./database/pet");
 
-//Definir as rotas
+//Definir as rotas Clientes
 app.get('/clientes', async (req, res) => {
     //select * form clientes
     const listaClientes = await Cliente.findAll();
@@ -30,7 +30,7 @@ app.get('/clientes/:id', async (req, res) => {
     } else {
         res.status(404).json({ message: "Usuario não encontrado" })
     }
-})
+});
 
 app.post('/clientes', async (req, res) => {
     //coletar informações do req.body
@@ -93,6 +93,66 @@ app.delete("/clientes/:id", async (req, res) => {
         res.status(500).json({ message: "Um erro aconteceu" })
     }
 });
+
+//Definir rotas para Pets
+app.get("/pets", async (req, res) => {
+    const listaPets = await Pet.findAll();
+    res.json(listaPets);
+});
+
+// buscar pets por id
+app.get("/pets/:id", async (req, res) => {
+    const {id} = req.params;
+
+    const buscarPet = await Pet.findByPk(id);
+    if(buscarPet){
+        res.json(buscarPet);
+    }
+    else {
+        res.status(404).json({message: "Pet nao encontrado"})
+    }
+})
+
+//add pet
+app.post('/pets', async (req, res) => {
+    const { nome, tipo, porte, dataNasc, clienteId } = req.body;
+
+    try {
+        const cliente = await Cliente.findByPk(clienteId);
+        if(cliente){
+            const novoPet = await Pet.create(
+                { nome, tipo, porte, dataNasc, clienteId }); // retorna o objeto pet
+                res.status(201).json(novoPet);
+        } else {
+            res.status(404).json({message: "Cliente não encontrado"})
+        } 
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({message: "Um erro aconteceu"})
+    }
+});
+
+//alterar pet ID
+app.put("/pets/:id", async (req, res) => {
+    const { nome, tipo, porte, dataNasc} = req.body;
+    const { id } = req.params;
+
+    try {
+        const alterarPet = await Pet.findOne({where: { id }});
+        if(alterarPet){
+            await alterarPet.update({where: {id}});
+            res.json(alterarPet);
+        }
+        else {
+            res.status(404).json({message: "Pet não encontrado!"})
+        }
+    } catch (err) {
+        console.log(err)
+        res.status(500).json({message: "Algo de errado aconteceu!"})
+    }
+});
+
+
 
 //Escuta de eventos(listen)
 app.listen(3000, () => {
