@@ -38,7 +38,7 @@ app.post('/clientes', async (req, res) => {
     try {
         //dentro de novo estara o objeto criado
         const novo = await Cliente.create(
-           { nome, email, telefone, endereco }, {
+            { nome, email, telefone, endereco }, {
              include: [Endereco]} //Permite inserir cliente e endereço num comando so
             );
         res.status(201).json(novo);
@@ -46,6 +46,50 @@ app.post('/clientes', async (req, res) => {
         console.log(err);
         res.status(500).json({ message: "Um erro aconteceu" })
     }
+});
+
+// atualizar o cliente pelo id
+app.put("/clientes/:id",async (req, res) => {
+    const {nome, email, telefone, endereco} = req.body;
+    const {id} = req.params;
+
+    try{
+        const cliente = await Cliente.findOne({where: { id }});
+        if(cliente){
+            if(endereco){
+                await Endereco.update(endereco, {where: {clienteId: id}});
+            }
+            await cliente.update({nome, email, telefone});
+            res.status(200).json({message: "Cliente editado!"});
+        }
+        else {
+            res.status(404).json({message: "Cliente não encontrado"})
+        }
+    }
+    catch(err) {
+        console.log(err)
+        res.status(500).json({message: "Um erro aconteceu!"})
+    }
+});
+
+//rota de deletar um cliente
+app.delete("/clientes/:id", async(req, res) =>{
+    const { id } = req.params;
+    const cliente = await Cliente.findOne({where: { id }});
+
+   try{
+    if (cliente) {
+        await cliente.destroy();
+        res.status(200).json({message:"Cliente removido"});
+    }
+    else {
+        res.status(404).json({message:"Cliente não encontrado"})
+    }
+   }
+   catch(err){
+    console.log(err);
+    res.status(500).json({message: "Um erro aconteceu"})
+   }
 });
 
 //Escuta de eventos(listen)
