@@ -28,7 +28,7 @@ const Cliente = connection.define("cliente", {
 
 //como relaciono as tabelas no sequelize
 // associacao 1:1 (one-to-one)
-const Endereco = require("./endereco");
+const Endereco = require("./endereco"); // importo o arquivo endereco,js
 
 //Cliente possui um enderço
 //Endereço ganha uma chave estrangeira(nome do model + id)

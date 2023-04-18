@@ -13,34 +13,36 @@ const { connection, authenticate } = require("./database/database");
 authenticate(connection); //efetivar a conexao
 const Cliente = require("./database/cliente"); // tenho que trazer para conf. o model da aplicação
 const Endereco = require("./database/endereco");
+const Pet = require("./database/pet");
 
 //Definir as rotas
 app.get('/clientes', async (req, res) => {
-   //select * form clientes
-   const listaClientes = await Cliente.findAll();
-   res.status(200).json(listaClientes);
+    //select * form clientes
+    const listaClientes = await Cliente.findAll();
+    res.status(200).json(listaClientes);
 });
 
 app.get('/clientes/:id', async (req, res) => {
     //select * from clientes where id = 5;
-    const cliente = await Cliente.findOne({ where: {id: req.params.id }, include: [Endereco] } );
-    if(cliente){
+    const cliente = await Cliente.findOne({ where: { id: req.params.id }, include: [Endereco] });
+    if (cliente) {
         res.json(cliente);
     } else {
-        res.status(404).json({message:"Usuario não encontrado"})
+        res.status(404).json({ message: "Usuario não encontrado" })
     }
 })
 
 app.post('/clientes', async (req, res) => {
     //coletar informações do req.body
     const { nome, email, telefone, endereco } = req.body;
-    
+
     try {
         //dentro de novo estara o objeto criado
         const novo = await Cliente.create(
             { nome, email, telefone, endereco }, {
-             include: [Endereco]} //Permite inserir cliente e endereço num comando so
-            );
+            include: [Endereco]
+        } //Permite inserir cliente e endereço num comando so
+        );
         res.status(201).json(novo);
     } catch (err) {
         console.log(err);
@@ -49,47 +51,47 @@ app.post('/clientes', async (req, res) => {
 });
 
 // atualizar o cliente pelo id
-app.put("/clientes/:id",async (req, res) => {
-    const {nome, email, telefone, endereco} = req.body;
-    const {id} = req.params;
+app.put("/clientes/:id", async (req, res) => {
+    const { nome, email, telefone, endereco } = req.body;
+    const { id } = req.params;
 
-    try{
-        const cliente = await Cliente.findOne({where: { id }});
-        if(cliente){
-            if(endereco){
-                await Endereco.update(endereco, {where: {clienteId: id}});
+    try {
+        const cliente = await Cliente.findOne({ where: { id } });
+        if (cliente) {
+            if (endereco) {
+                await Endereco.update(endereco, { where: { clienteId: id } });
             }
-            await cliente.update({nome, email, telefone});
-            res.status(200).json({message: "Cliente editado!"});
+            await cliente.update({ nome, email, telefone });
+            res.status(200).json({ message: "Cliente editado!" });
         }
         else {
-            res.status(404).json({message: "Cliente não encontrado"})
+            res.status(404).json({ message: "Cliente não encontrado" })
         }
     }
-    catch(err) {
+    catch (err) {
         console.log(err)
-        res.status(500).json({message: "Um erro aconteceu!"})
+        res.status(500).json({ message: "Um erro aconteceu!" })
     }
 });
 
 //rota de deletar um cliente
-app.delete("/clientes/:id", async(req, res) =>{
+app.delete("/clientes/:id", async (req, res) => {
     const { id } = req.params;
-    const cliente = await Cliente.findOne({where: { id }});
+    const cliente = await Cliente.findOne({ where: { id } });
 
-   try{
-    if (cliente) {
-        await cliente.destroy();
-        res.status(200).json({message:"Cliente removido"});
+    try {
+        if (cliente) {
+            await cliente.destroy();
+            res.status(200).json({ message: "Cliente removido" });
+        }
+        else {
+            res.status(404).json({ message: "Cliente não encontrado" })
+        }
     }
-    else {
-        res.status(404).json({message:"Cliente não encontrado"})
+    catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "Um erro aconteceu" })
     }
-   }
-   catch(err){
-    console.log(err);
-    res.status(500).json({message: "Um erro aconteceu"})
-   }
 });
 
 //Escuta de eventos(listen)
