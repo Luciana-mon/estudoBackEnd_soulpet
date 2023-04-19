@@ -33,7 +33,9 @@ const Endereco = require("./endereco"); // importo o arquivo endereco,js
 //Cliente possui um enderço
 //Endereço ganha uma chave estrangeira(nome do model + id)
 // chave estrangeira =clienteId
-Cliente.hasOne(Endereco);
+//relacionamento 1:N (um cliente pode ter N pets)
+Cliente.hasOne(Endereco, { onDelete: "CASCADE"});
+//CASCADE = quando o cliente for deletado, todos os pets serão deletados
 Endereco.belongsTo(Cliente); //Endereço pertece a um cliente
 
 module.exports = Cliente;
